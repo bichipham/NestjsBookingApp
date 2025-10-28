@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model bookings {
+  id            Int              @id @default(autoincrement())
+  room_id       Int
+  guest_id      Int
+  checkin_date  DateTime         @db.Date
+  checkout_date DateTime         @db.Date
+  total_guest   Int?
+  total_price   Decimal?         @db.Decimal(10, 2)
+  status        bookings_status? @default(pending)
+  users         users            @relation(fields: [guest_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bookings_ibfk_1")
+  rooms         rooms            @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bookings_ibfk_2")
+  reviews       reviews[]
+
+  @@index([guest_id], map: "guest_id")
+  @@index([room_id], map: "room_id")
+}
+
+model positions {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique(map: "name") @db.VarChar(100)
+  country String  @default("VN") @db.VarChar(100)
+  image   String? @db.VarChar(255)
+  rooms   rooms[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id         Int       @id @default(autoincrement())
+  booking_id Int
+  guest_id   Int
+  rating     Int?
+  comments   String?   @db.Text
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  bookings   bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reviews_ibfk_1")
+  users      users     @relation(fields: [guest_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reviews_ibfk_2")
+
+  @@index([booking_id], map: "booking_id")
+  @@index([guest_id], map: "guest_id")
+}
+
+model rooms {
+  id                 Int        @id @default(autoincrement())
+  name               String     @db.VarChar(255)
+  max_guests         Int?
+  bedroom            Int?
+  beds               Int?
+  bathroom           Int?
+  description        String?    @db.VarChar(255)
+  price              Decimal    @db.Decimal(10, 2)
+  is_washing_machine Boolean?
+  is_iron            Boolean?
+  is_televison       Boolean?
+  is_aircondition    Boolean?
+  is_wifi            Boolean?
+  is_kitchen         Boolean?
+  is_parking         Boolean?
+  is_pool            Boolean?
+  main_image         String?    @db.VarChar(255)
+  position_id        Int?
+  bookings           bookings[]
+  positions          positions? @relation(fields: [position_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "rooms_ibfk_1")
+
+  @@index([position_id], map: "position_id")
+}
+
+model users {
+  id       Int        @id @default(autoincrement())
+  name     String     @db.VarChar(100)
+  email    String     @db.VarChar(150)
+  passwod  String     @db.VarChar(255)
+  role     String?    @default("guest") @db.VarChar(150)
+  phone    String?    @db.VarChar(20)
+  birthday String?    @db.VarChar(255)
+  gender   String?    @db.VarChar(150)
+  bookings bookings[]
+  reviews  reviews[]
+}
+
+enum bookings_status {
+  pending
+  confirmed
+  canceled
+}
