@@ -6,16 +6,22 @@ import {
   Body,
   Param,
   Put,
+  Query
 } from '@nestjs/common';
 import { RoomService } from './room.service';
+import { QueryDto } from 'src/modules/dto/query.dto';
 
 @Controller('room')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
   @Get()
-  findAll() {
-    return this.roomService.findAll();
-  }
+  findByPage(@Query() query: QueryDto) {
+     // find with page
+     return this.roomService.findPaging(
+       +query?.page || 1,
+       +query?.size || 10,
+     );
+   }
   @Post()
   create(@Body() data: any) {
     return this.roomService.create(data);

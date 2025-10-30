@@ -9,6 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
+import { QueryDto } from 'src/modules/dto/query.dto';
 
 interface QueryType {
   page: number;
@@ -27,7 +28,7 @@ export class PositionController {
     return this.positionService.create(data);
   }
   @Get()
-  findByPage(@Query() query: QueryType) {
+  findByPage(@Query() query: QueryDto) {
     // find with page
     return this.positionService.findPaging(
       +query?.page || 1,
