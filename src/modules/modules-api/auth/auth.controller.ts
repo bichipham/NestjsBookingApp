@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -17,6 +18,7 @@ import type { users } from 'generated/prisma';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
+import { QueryDto } from 'src/modules/dto/query.dto';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -35,25 +37,15 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  @Get('get-info')
+  @Get('get-info/:id')
   @MessageResponse('Lấy thông tin người dùng thành công')
-  getInfo(@User() user: users) {
-    return this.authService.getInfo(user);
-  }
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  getInfo(id: number) {
+    return this.authService.getInfo(id);
   }
 
   @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  findByPage(@Query() query: QueryDto) {
+    return this.authService.findPaging(query?.page || 1, query?.size || 10);
   }
 
   @Patch(':id')

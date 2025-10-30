@@ -56,7 +56,7 @@ export class AuthService {
     });
 
     if (userExits) {
-      throw new BadRequestException('Ông có tài khoản đăng ký chi nữa');
+      throw new BadRequestException('Người dùng đã tồn tại, vui lòng đăng nhập');
     }
 
     const passwordHash = bcrypt.hashSync(password, 10);
@@ -69,34 +69,32 @@ export class AuthService {
       },
     });
 
-    console.log({ userNew });
-
-    // delete userNew.password;
-
-    return userNew;
+    return { userNew };
   }
 
-  getInfo(user: users) {
-    return { ...user, password: undefined };
+ getInfo(id: number) {
+    return this.prisma.users.findUnique({
+      where: { id },
+    });
   }
 
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  findPaging(page: number, size: number) {
+    return this.prisma.users.findMany({
+      skip: (page - 1) * size,
+      take: size,
+    });
   }
 
   update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+    return this.prisma.users.update({
+      where: { id },
+      data: updateAuthDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return this.prisma.users.delete({
+      where: { id },
+    });
   }
 }
