@@ -90,6 +90,10 @@ export class AuthService {
         email: true,
         name: true,
         avatar: true,
+        role: true,
+        phone: true,
+        birthday: true,
+        gender: true,
       },
     });
   }
@@ -108,6 +112,10 @@ export class AuthService {
   }
   async uploadAvatar(userId: number, file: Express.Multer.File) {
     // upload cloud
+    console.log(`uploadAvatar file`, file);
+    if (!file) {
+      throw new BadRequestException('File không được để trống');
+    }
     const result = await this.cloudinaryService.uploadImage(file);
     
     // update user

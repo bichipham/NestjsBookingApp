@@ -7,7 +7,8 @@ import {
   Param,
   Delete,
   Query,
-  Req
+  Req,
+  UploadedFile
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -20,6 +21,9 @@ import { MessageResponse } from 'src/common/decorators/message-response.decorato
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import { QueryDto } from 'src/modules/dto/query.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UseInterceptors } from '@nestjs/common';
+import multer from 'multer';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -60,9 +64,10 @@ export class AuthController {
     return this.authService.remove(+id);
   }
 
-  @Post('upload-avatar')
   // upload avatar for user
-  uploadAvatar(@User() user: users, @Body() file: Express.Multer.File) {
+  @Post('upload-avatar')
+   @UseInterceptors(FileInterceptor('file'))
+  uploadAvatar(@User() user: users, @UploadedFile() file: Express.Multer.File) {
     return this.authService.uploadAvatar(user.id, file);
   }
 }
