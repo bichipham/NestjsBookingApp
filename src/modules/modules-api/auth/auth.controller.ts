@@ -3,10 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
-  Query
+  Query,
+  Req
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -23,7 +24,7 @@ import { QueryDto } from 'src/modules/dto/query.dto';
 @Controller('auth')
 @ApiBearerAuth()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('login')
   @Public()
@@ -37,10 +38,11 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  @Get('get-info/:id')
+  @Get('get-info')
   @MessageResponse('Lấy thông tin người dùng thành công')
-  getInfo(id: number) {
-    return this.authService.getInfo(id);
+  getInfo(@User() user: users, @Req() req) {
+    console.log(`req`, req.user);
+    return this.authService.getInfo(user);
   }
 
   @Get()
@@ -48,13 +50,19 @@ export class AuthController {
     return this.authService.findPaging(query?.page || 1, query?.size || 10);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @Put() 
+  update(@User() user: users, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(user, updateAuthDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.authService.remove(+id);
+  }
+
+  @Post('upload-avatar')
+  // upload avatar for user
+  uploadAvatar(@User() user: users, @Body() file: Express.Multer.File) {
+    return this.authService.uploadAvatar(user.id, file);
   }
 }

@@ -29,7 +29,7 @@ export class ResponseSuccessInterceptor implements NestInterceptor {
         return {
           status: `success`,
           statusCode: statusCode,
-          message: message || "Ê gắn decorator MessageResponse vào controller đi",
+          message: message || 'Thao tác thành công',
           data: data,
         };
       }),

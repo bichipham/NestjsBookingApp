@@ -82,6 +82,7 @@ model users {
   phone    String?    @db.VarChar(20)
   birthday String?    @db.VarChar(255)
   gender   String?    @db.VarChar(150)
+  avatar   String?    @db.VarChar(255)
   bookings bookings[]
   reviews  reviews[]
 }

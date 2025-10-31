@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/modules/modules-system/token/token.service';
 import { users } from 'generated/prisma';
 import { RegisterDto } from './dto/register.dto';
+import { CloudinaryService } from 'src/modules/modules-system/clouddinary/cloudinary.service';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -72,22 +74,29 @@ export class AuthService {
     return { userNew };
   }
 
- getInfo(id: number) {
-    return this.prisma.users.findUnique({
-      where: { id },
-    });
+ getInfo(user: users) {
+    //return user without password
+    const { password, ...userInfo } = user || {};
+    return userInfo;
   }
 
   findPaging(page: number, size: number) {
+    // get list and remove password field
     return this.prisma.users.findMany({
       skip: (page - 1) * size,
       take: size,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+      },
     });
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
+  update(user: users, updateAuthDto: UpdateAuthDto) {
     return this.prisma.users.update({
-      where: { id },
+      where: { id: user.id },
       data: updateAuthDto,
     });
   }
@@ -97,4 +106,21 @@ export class AuthService {
       where: { id },
     });
   }
+  async uploadAvatar(userId: number, file: Express.Multer.File) {
+    // upload cloud
+    const result = await this.cloudinaryService.uploadImage(file);
+    
+    // update user
+    const updated = await this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        avatar: result['secure_url'],
+      },
+    });
+    return {
+      avatar: updated.avatar,
+      message: 'Upload avatar thành công',
+    };
+  }
 }
+
