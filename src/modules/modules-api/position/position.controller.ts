@@ -11,6 +11,8 @@ import {
 import { PositionService } from './position.service';
 import { QueryDto } from 'src/modules/dto/query.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { User } from 'src/common/decorators/user.decorator';
+import type { users } from 'generated/prisma';
 
 interface QueryType {
   page: number;
@@ -20,12 +22,15 @@ interface QueryType {
 @Controller('position')
 export class PositionController {
   constructor(private readonly positionService: PositionService) {}
+  
   @Post()
   @Roles('admin')
   create(@Body() data: any) {
     return this.positionService.create(data);
   }
+  
   @Get()
+  // Anyone can view positions list - requires authentication but no specific role
   findByPage(@Query() query: QueryDto) {
     // find with page
     return this.positionService.findPaging(
@@ -33,17 +38,19 @@ export class PositionController {
       +query?.size || 10,
     );
   }
+  
   @Delete(':id')
   @Roles('admin')
   remove(@Param('id') id: string) {
     return this.positionService.remove(+id);
   }
+  
   @Get(':id')
-  @Roles('admin')
-  // find position by id
+  // Anyone can view position details - requires authentication but no specific role
   findOne(@Param('id') id: string) {
     return this.positionService.findOne(+id);
   }
+  
   @Put(':id')
   @Roles('admin')
   // update position by id

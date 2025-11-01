@@ -12,46 +12,44 @@ import { QueryDto } from 'src/modules/dto/query.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BookingService } from './booking.service';
 import { BookingDto } from '../auth/dto/booking.dto';
+import { User } from 'src/common/decorators/user.decorator';
+import type { users } from 'generated/prisma';
+import { UpdateBookingDto } from '../auth/dto/update-booking.dto';
 
 @Controller('booking')
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  // đặt phòng
+  // đặt phòng - requires authentication, any user can book
   @Post()
-  create( @Body() data: BookingDto) {
+  create(@User() user: users, @Body() data: BookingDto) {
     return this.bookingService.create(data);
   }
 
-  // xoá đặt phòng
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookingService.remove(+id);
-  }
-
-  // thông tin đặt phòng theo id
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bookingService.findOne(+id);
-  }
-
-  // cập nhật đặt phòng
-  @Put(':id')
-  update(@Param('id') id: string, @Body() data: any) {
+  // update đặt phòng - requires authentication, any user can book
+  @Put(":id")
+  update(@User() user: users, @Param('id') id: string, @Body() data: UpdateBookingDto) {
     return this.bookingService.update(+id, data);
   }
 
-  // danh sách đặt phòng có phân trang
+  // xoá đặt phòng - users can delete their own bookings, admins can delete any
+  @Delete(':id')
+  remove(@User() user: users, @Param('id') id: string) {
+    return this.bookingService.remove(+id);
+  }
+
+  // danh sách đặt phòng có phân trang - admin can see all, users see their own
   @Get()
-  findByPage(@Query() query: QueryDto) {
+  findByPage(@User() user: users, @Query() query: QueryDto) {
     return this.bookingService.findPaging(
       +query?.page || 1,
       +query?.size || 10,
     );
   }
 
+  // lấy danh sách phòng đã đặt của user - requires authentication
   @Get('rooms-by-user/:id')
-  findRoomsByUser(@Param('id') userId: string) {
+  findRoomsByUser(@User() user: users, @Param('id') userId: string) {
     return this.bookingService.findRoomsByUser(+userId);
   }
 }
