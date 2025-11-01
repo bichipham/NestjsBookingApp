@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { LoginDto } from './dto/login.dto';
+import { UpdateAuthDto } from '../../dto/update-auth.dto';
+import { LoginDto } from '../../dto/login.dto';
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 // import bcrypt from 'bcrypt';
 import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/modules/modules-system/token/token.service';
 import { users } from 'generated/prisma';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto } from '../../dto/register.dto';
 import { CloudinaryService } from 'src/modules/modules-system/clouddinary/cloudinary.service';
 
 

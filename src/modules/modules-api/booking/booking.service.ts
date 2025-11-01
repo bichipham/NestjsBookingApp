@@ -1,18 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
-import { BookingDto } from '../auth/dto/booking.dto';
-import { UpdateBookingDto } from '../auth/dto/update-booking.dto';
-import { Prisma, bookings } from 'generated/prisma';
-import { BadRequestException } from '@nestjs/common';
+import { BookingDto } from '../../dto/booking.dto';
+import { UpdateBookingDto } from '../../dto/update-booking.dto';
+import { Prisma, bookings, users } from 'generated/prisma';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) { }
   
-  async findRoomsByUser(userId: number): Promise<bookings[]> {
+  async findRoomsByUser(user,userId: number): Promise<bookings[]> {
     // Validate userId
     if (!userId || typeof userId !== 'number' || userId <= 0) {
       throw new BadRequestException('Valid user ID is required');
+    }
+
+    // admin can see any user's bookings, user can see own bookings
+    if (user.role !== 'admin' && user.id !== userId) {
+      throw new ForbiddenException('You do not have permission to access these bookings');
     }
 
     const userBookings = await this.prisma.bookings.findMany({
@@ -189,7 +194,7 @@ export class BookingService {
     }
   }
 
-  async findOne(id: number): Promise<bookings | null> {
+  async findOne(user: users, id: number): Promise<bookings | null> {
     // Validate id
     if (!id || typeof id !== 'number' || id <= 0) {
       throw new BadRequestException('Valid booking ID is required');
@@ -210,7 +215,14 @@ export class BookingService {
         }
       }
     });
-    return booking;
+    // admin can see any room, user can see own booking
+    if (user.role === 'admin') {
+      return booking;
+    }
+    if (booking && booking.guest_id === user.id) {
+      return booking;
+    }
+    throw new ForbiddenException('You do not have permission to access this booking');
   }
 
   async update(id: number, data: UpdateBookingDto): Promise<bookings> {

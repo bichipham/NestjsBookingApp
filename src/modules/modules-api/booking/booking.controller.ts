@@ -11,10 +11,10 @@ import {
 import { QueryDto } from 'src/modules/dto/query.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BookingService } from './booking.service';
-import { BookingDto } from '../auth/dto/booking.dto';
+import { BookingDto } from '../../dto/booking.dto';
 import { User } from 'src/common/decorators/user.decorator';
 import type { users } from 'generated/prisma';
-import { UpdateBookingDto } from '../auth/dto/update-booking.dto';
+import { UpdateBookingDto } from '../../dto/update-booking.dto';
 
 @Controller('booking')
 export class BookingController {
@@ -46,10 +46,15 @@ export class BookingController {
       +query?.size || 10,
     );
   }
+  // lấy chi tiết đặt phòng by id - requires authentication
+  @Get(':id')
+  findOne(@User() user: users, @Param('id') id: string) {
+    return this.bookingService.findOne(user,+id);
+  }
 
   // lấy danh sách phòng đã đặt của user - requires authentication
   @Get('rooms-by-user/:id')
   findRoomsByUser(@User() user: users, @Param('id') userId: string) {
-    return this.bookingService.findRoomsByUser(+userId);
+    return this.bookingService.findRoomsByUser(user,+userId);
   }
 }

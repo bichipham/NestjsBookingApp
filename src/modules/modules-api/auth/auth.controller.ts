@@ -11,14 +11,14 @@ import {
   UploadedFile
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { LoginDto } from './dto/login.dto';
+import { UpdateAuthDto } from '../../dto/update-auth.dto';
+import { LoginDto } from '../../dto/login.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import type { users } from 'generated/prisma';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto } from '../../dto/register.dto';
 import { QueryDto } from 'src/modules/dto/query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UseInterceptors } from '@nestjs/common';

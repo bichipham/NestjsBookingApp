@@ -10,9 +10,10 @@ import { CloudinaryModule } from './modules/modules-system/clouddinary/cloudinar
 import { TokenModule } from './modules/modules-system/token/token.module';
 import { ProtectGuard } from './common/guard/protect/protect.guard';
 import { BookingModule } from './modules/modules-api/booking/booking.module';
+import { ReviewsModule } from './modules/modules-api/reviews/reviews.module';
 @Module({
   imports: [RoomModule, PositionModule, 
-    AuthModule, PrismaModule, BookingModule, TokenModule, CloudinaryModule],
+    AuthModule, PrismaModule, BookingModule, TokenModule, CloudinaryModule, ReviewsModule],
   controllers: [AppController],
   providers: [AppService, ProtectGuard, AuthStrategy],
 })
