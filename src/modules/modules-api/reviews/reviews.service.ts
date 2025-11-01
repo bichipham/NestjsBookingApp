@@ -1,26 +1,65 @@
 import { Injectable } from '@nestjs/common';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
+import { CreateReviewDto } from '../../dto/create-review.dto';
+import { UpdateReviewDto } from "../../dto/update-review.dto";
+import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 
 @Injectable()
 export class ReviewsService {
-  create(createReviewDto: CreateReviewDto) {
-    return 'This action adds a new review';
+  constructor(
+    private readonly prisma: PrismaService,
+  ) { }
+  create(user, createReviewDto: CreateReviewDto) {
+    // add review logic here
+    const { booking_id, guest_id, rating, comments } = createReviewDto;
+
+    return this.prisma.reviews.create({
+      data: {
+        booking_id,
+        guest_id,
+        rating,
+        comments
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all reviews`;
+  // find reviews by room id
+  findByRoom(roomId: number) {
+    return this.prisma.reviews.findMany({
+      where: {
+        bookings: {
+          room_id: roomId
+        }
+      },
+      include: {
+        bookings: true
+      }
+    });
   }
 
+  // find review by id
   findOne(id: number) {
-    return `This action returns a #${id} review`;
+    return this.prisma.reviews.findUnique({
+      where: { id },
+      include: {
+        bookings: true
+      }
+    });
   }
 
-  update(id: number, updateReviewDto: UpdateReviewDto) {
-    return `This action updates a #${id} review`;
+  async update(id: number, updateReviewDto: UpdateReviewDto) {
+    const res = await this.prisma.reviews.update({
+      where: { id },
+      data: updateReviewDto
+    });
+    return { message: `Review with id ${id} updated successfully`, data: res };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async remove(id: number) {
+    const res = await this.prisma.reviews.delete({
+      where: { id }
+    });
+    return {
+      message: `Review with id ${id} deleted successfully`
+    }
   }
 }

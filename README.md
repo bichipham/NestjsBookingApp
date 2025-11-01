@@ -16,7 +16,7 @@ This is a full-featured room booking application API built with NestJS framework
 
 - **User Authentication & Authorization**
   - JWT-based authentication
-  - Role-based access control (User/Admin)
+  - Role-based access control (Guest/Admin)
   - User registration and login
   - Profile management with avatar upload
 
@@ -35,6 +35,11 @@ This is a full-featured room booking application API built with NestJS framework
 - **Location Management**
   - Position/Location CRUD operations
   - Room filtering by location
+
+- **Review System**
+  - Review management for bookings
+  - Room reviews and ratings
+  - User review history
 
 ## 🏗️ Architecture
 
@@ -73,9 +78,11 @@ src/
 │   │   ├── auth/           # Authentication module
 │   │   ├── booking/        # Booking management
 │   │   ├── room/           # Room management
-│   │   └── position/       # Location management
+│   │   ├── position/       # Location management
+│   │   └── reviews/        # Review management
 │   └── modules-system/
-│       └── prisma/         # Prisma service
+│       ├── prisma/         # Prisma service
+│       └── cloudinary/     # File upload service
 └── main.ts                 # Application entry point
 ```
 
@@ -131,44 +138,54 @@ npm run start:debug
 |--------|----------|-------------|---------------|------|
 | POST | `/auth/login` | User login | ❌ | - |
 | POST | `/auth/register` | User registration | ❌ | - |
-| GET | `/auth/get-info` | Get user profile | ✅ | User/Admin |
+| GET | `/auth/get-info` | Get user profile | ✅ | Guest/Admin |
 | GET | `/auth` | Get all users (paginated) | ✅ | Admin |
-| PUT | `/auth` | Update user profile | ✅ | User/Admin |
+| PUT | `/auth` | Update user profile | ✅ | Guest/Admin |
 | DELETE | `/auth/:id` | Delete user | ✅ | Admin |
-| POST | `/auth/upload-avatar` | Upload user avatar | ✅ | User/Admin |
+| POST | `/auth/upload-avatar` | Upload user avatar | ✅ | Guest/Admin |
 
 ### Room Management Endpoints
 
 | Method | Endpoint | Description | Auth Required | Role |
 |--------|----------|-------------|---------------|------|
-| GET | `/room` | Get rooms (paginated) | ❌ | - |
+| GET | `/room` | Get rooms (paginated) | ✅ | Guest/Admin |
 | POST | `/room` | Create new room | ✅ | Admin |
-| GET | `/room/:id` | Get room by ID | ❌ | - |
+| GET | `/room/:id` | Get room by ID | ✅ | Guest/Admin |
 | PUT | `/room/:id` | Update room | ✅ | Admin |
 | DELETE | `/room/:id` | Delete room | ✅ | Admin |
-| GET | `/room/position/:position` | Get rooms by location | ❌ | - |
+| GET | `/room/position/:position` | Get rooms by location | ✅ | Guest/Admin |
 | POST | `/room/upload-image/:id` | Upload room image | ✅ | Admin |
 
 ### Booking Endpoints
 
 | Method | Endpoint | Description | Auth Required | Role |
 |--------|----------|-------------|---------------|------|
-| GET | `/booking` | Get bookings (paginated) | ✅ | User/Admin |
-| POST | `/booking` | Create booking | ✅ | User/Admin |
-| GET | `/booking/:id` | Get booking by ID | ✅ | User/Admin |
-| PUT | `/booking/:id` | Update booking | ✅ | User/Admin |
-| DELETE | `/booking/:id` | Delete booking | ✅ | User/Admin |
-| GET | `/booking/rooms-by-user/:id` | Get user's bookings | ✅ | User/Admin |
+| GET | `/booking` | Get bookings (paginated) | ✅ | Guest/Admin |
+| POST | `/booking` | Create booking | ✅ | Guest/Admin |
+| GET | `/booking/:id` | Get booking by ID | ✅ | Guest/Admin |
+| PUT | `/booking/:id` | Update booking | ✅ | Guest/Admin |
+| DELETE | `/booking/:id` | Delete booking | ✅ | Guest/Admin |
+| GET | `/booking/rooms-by-user/:id` | Get user's bookings | ✅ | Guest/Admin |
 
 ### Position/Location Endpoints
 
 | Method | Endpoint | Description | Auth Required | Role |
 |--------|----------|-------------|---------------|------|
-| GET | `/position` | Get positions (paginated) | ❌ | - |
+| GET | `/position` | Get positions (paginated) | ✅ | Guest/Admin |
 | POST | `/position` | Create position | ✅ | Admin |
-| GET | `/position/:id` | Get position by ID | ✅ | Admin |
+| GET | `/position/:id` | Get position by ID | ✅ | Guest/Admin |
 | PUT | `/position/:id` | Update position | ✅ | Admin |
 | DELETE | `/position/:id` | Delete position | ✅ | Admin |
+
+### Reviews Endpoints
+
+| Method | Endpoint | Description | Auth Required | Role |
+|--------|----------|-------------|---------------|------|
+| GET | `/reviews/find-by-room/:id` | Get reviews by room | ✅ | Guest/Admin |
+| POST | `/reviews` | Create review | ✅ | Guest/Admin |
+| GET | `/reviews/:id` | Get review by ID | ✅ | Guest/Admin |
+| PUT | `/reviews/:id` | Update review | ✅ | Guest/Admin |
+| DELETE | `/reviews/:id` | Delete review | ✅ | Guest/Admin |
 
 ## 🔐 Authentication & Authorization
 
@@ -180,9 +197,9 @@ Authorization: Bearer <your-jwt-token>
 ```
 
 ### Role-Based Access Control
-- **Public Routes**: No authentication required (login, register, view rooms)
-- **User Routes**: Requires valid JWT token (booking operations, profile management)
-- **Admin Routes**: Requires admin role (room management, user management, position management)
+- **Public Routes**: No authentication required (only login and register)
+- **Guest/Admin Routes**: Requires valid JWT token - accessible to both guest and admin users (endpoints without specific role guards)
+- **Admin Routes**: Requires admin role specifically (endpoints with @Roles('admin') decorator)
 
 ### Using Decorators
 

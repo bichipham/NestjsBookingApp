@@ -66,6 +66,25 @@ export class RoomService {
       if (!room) {
         throw new BadRequestException(`Room with id ${id} does not exist`);
       }
+      // xoá revirw liên quan đến phòng trước
+      const relatedReviews = await this.prisma.reviews.findMany({
+        where: {
+          bookings: {
+            room_id: id
+          }
+        }
+      });
+      for (const review of relatedReviews) {
+        await this.prisma.reviews.delete({ where: { id: review.id } });
+      }
+      // xoá booking liên quan đến phòng trước
+      const relatedBookings = await this.prisma.bookings.findMany({
+        where: { room_id: id }
+      });
+      for (const booking of relatedBookings) {
+        await this.prisma.bookings.delete({ where: { id: booking.id } });
+      }
+      // xoá phòng
       await this.prisma.rooms.delete({ where: { id } });
       return { message: `Remove room with id ${id}` };
     } catch (error) {
