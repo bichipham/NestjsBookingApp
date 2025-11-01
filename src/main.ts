@@ -6,6 +6,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseSuccessInterceptor } from './common/interceptors/response-success.interceptor';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ProtectGuard } from './common/guard/protect/protect.guard';
+import { RolesGuard } from './common/guard/protect/role.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +22,7 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalInterceptors(new ResponseSuccessInterceptor(reflector));
-  app.useGlobalGuards(new ProtectGuard(reflector));
+  app.useGlobalGuards(new ProtectGuard(reflector), new RolesGuard(reflector));
   
   const config = new DocumentBuilder()
     .setTitle('Cyber Community')

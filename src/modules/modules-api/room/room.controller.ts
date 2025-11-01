@@ -6,10 +6,14 @@ import {
   Body,
   Param,
   Put,
-  Query
+  Query,
+  UploadedFile
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { QueryDto } from 'src/modules/dto/query.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UseInterceptors } from '@nestjs/common';
 
 @Controller('room')
 export class RoomController {
@@ -23,10 +27,12 @@ export class RoomController {
      );
    }
   @Post()
+  @Roles('admin')
   create(@Body() data: any) {
     return this.roomService.create(data);
   }
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id') id: string) {
     return this.roomService.remove(+id);
   }
@@ -41,13 +47,17 @@ export class RoomController {
     return this.roomService.findByLocation(+position);
   }
   @Put(':id')
+  @Roles('admin')
   // update room by id
   update(@Param('id') id: string, @Body() data: any) {
     return this.roomService.update(+id, data);
   }
-  @Post('upload')
+
+  @Post('upload-image/:id')
+  @Roles('admin')
+  @UseInterceptors(FileInterceptor('file'))
   // upload image for room
-  uploadImage() {
-    return this.roomService.uploadImage();
+  uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.roomService.uploadImage(+id, file);
   }
 }

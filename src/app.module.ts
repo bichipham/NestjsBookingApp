@@ -9,8 +9,10 @@ import { AuthStrategy } from './common/guard/protect/auth.strategy';
 import { CloudinaryModule } from './modules/modules-system/clouddinary/cloudinary.module';
 import { TokenModule } from './modules/modules-system/token/token.module';
 import { ProtectGuard } from './common/guard/protect/protect.guard';
+import { BookingModule } from './modules/modules-api/booking/booking.module';
 @Module({
-  imports: [RoomModule, PositionModule, AuthModule, PrismaModule, TokenModule, CloudinaryModule],
+  imports: [RoomModule, PositionModule, 
+    AuthModule, PrismaModule, BookingModule, TokenModule, CloudinaryModule],
   controllers: [AppController],
   providers: [AppService, ProtectGuard, AuthStrategy],
 })

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { QueryDto } from 'src/modules/dto/query.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 interface QueryType {
   page: number;
@@ -19,11 +20,8 @@ interface QueryType {
 @Controller('position')
 export class PositionController {
   constructor(private readonly positionService: PositionService) {}
-  //   @Get()
-  //   findAll() {
-  //     return this.positionService.findAll();
-  //   }
   @Post()
+  @Roles('admin')
   create(@Body() data: any) {
     return this.positionService.create(data);
   }
@@ -36,15 +34,18 @@ export class PositionController {
     );
   }
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id') id: string) {
     return this.positionService.remove(+id);
   }
   @Get(':id')
+  @Roles('admin')
   // find position by id
   findOne(@Param('id') id: string) {
     return this.positionService.findOne(+id);
   }
   @Put(':id')
+  @Roles('admin')
   // update position by id
   update(@Param('id') id: string, @Body() data: any) {
     return this.positionService.update(+id, data);

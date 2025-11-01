@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
 import { AddRoomDto } from 'src/modules/dto/addroom.dto';
+import { CloudinaryService } from 'src/modules/modules-system/clouddinary/cloudinary.service';
 @Injectable()
 export class RoomService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService, private readonly cloudinaryService: CloudinaryService) { }
   async findPaging(page: number, size: number) {
     const rooms = await this.prisma.rooms.findMany({
       include: {
@@ -146,7 +147,30 @@ export class RoomService {
     }
   }
   // upload image for room
-  async uploadImage() {
-    return { message: 'Upload image for room' };
+  async uploadImage(id: number, file: Express.Multer.File) {
+    console.log(`uploadAvatar file`, file);
+    if (!file) {
+      throw new BadRequestException('File không được để trống');
+    }
+    // check room exists
+    const roomExists = await this.prisma.rooms.findUnique({ where: { id } });
+    if (!roomExists) {
+      throw new BadRequestException(`Room with id ${id} not found`);
+    }
+
+    // upload image to cloudinary
+    const result = await this.cloudinaryService.uploadImage(file);
+
+    // update room
+    const updated = await this.prisma.rooms.update({
+      where: { id: id },
+      data: {
+        main_image: result['secure_url'],
+      },
+    });
+    return {
+      image: updated.main_image,
+      message: 'Upload image thành công',
+    };
   }
 }

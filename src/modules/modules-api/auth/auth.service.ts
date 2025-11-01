@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
@@ -49,7 +48,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const { email, password, name } = registerDto;
+    const { email, password, name, role } = registerDto;
 
     const userExits = await this.prisma.users.findUnique({
       where: {
@@ -65,9 +64,8 @@ export class AuthService {
 
     const { password: _, ...userNew } = await this.prisma.users.create({
       data: {
-        email: email,
-        password: passwordHash,
-        name: name,
+        ...registerDto,
+        password: passwordHash
       },
     });
 

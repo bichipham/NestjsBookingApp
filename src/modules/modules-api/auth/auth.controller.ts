@@ -11,7 +11,6 @@ import {
   UploadedFile
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -23,7 +22,7 @@ import { RegisterDto } from './dto/register.dto';
 import { QueryDto } from 'src/modules/dto/query.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UseInterceptors } from '@nestjs/common';
-import multer from 'multer';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -50,6 +49,7 @@ export class AuthController {
   }
 
   @Get()
+  @Roles('admin')
   findByPage(@Query() query: QueryDto) {
     return this.authService.findPaging(query?.page || 1, query?.size || 10);
   }
@@ -60,13 +60,14 @@ export class AuthController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id') id: string) {
     return this.authService.remove(+id);
   }
 
   // upload avatar for user
   @Post('upload-avatar')
-   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file'))
   uploadAvatar(@User() user: users, @UploadedFile() file: Express.Multer.File) {
     return this.authService.uploadAvatar(user.id, file);
   }
